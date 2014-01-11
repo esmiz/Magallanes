@@ -196,8 +196,14 @@ class Console
     {
         if (self::$logEnabled) {
             if (self::$log == null) {
-            	self::$logFile = realpath('.mage/logs') . '/log-' . date('Ymd-His') . '.log';
-                self::$log = fopen(self::$logFile, 'w');
+                if (self::checkLogDir()) {
+                    self::$logFile = realpath('.mage/logs') . '/log-' . date('Ymd-His') . '.log';
+                    self::$log = fopen(self::$logFile, 'w');
+                } else {
+                    self::$logEnabled = false;
+                    self::output('<yellow> WARNING: Log directory could not be created. Logs disabled for this run.</yellow>', 1, 2);
+                    return;
+                }
             }
 
             $message = date('Y-m-d H:i:s -- ') . $message;
@@ -248,4 +254,22 @@ class Console
         	}
         }
     }
+
+    /**
+     * Check Log Dir
+     * @return boolean
+     */
+    private static function checkLogDir()
+    {
+        if(!is_dir('.mage/logs')){
+            if (mkdir('.mage/logs')) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
 }
